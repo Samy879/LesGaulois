@@ -1,11 +1,16 @@
 package personnages;
 import village_gaulois.Village;
+import objets.Equipement;
+import village_gaulois.Musee;
 
 public class Gaulois {
 	private String nom;
-	private int force;
 	private int effetPotion = 1;
 	private Village village;
+	private int force;
+	private int nbTrophees;
+	private Equipement[] trophees = new Equipement[100];
+	
 	
 	public Gaulois(String nom, int force) {
 		this.nom = nom;
@@ -20,20 +25,23 @@ public class Gaulois {
 		System.out.println(prendreParole() + "\"" + texte + "\"");
 		
 }
-
+	
 	private String prendreParole() {
 		return "Le gaulois " + nom + " : ";
 	}
 	
-	public String toString() {
-		return nom;
-	}
-	
 	public void frapper(Romain romain) {
-		System.out.println(nom + " envoie un grand coup dans la machoire de " + romain.getNom());
-		romain.recevoirCoup(force*effetPotion/3);
-		if (this.effetPotion > 1) {
-	        this.effetPotion -= 1;
+	    System.out.println(nom + " envoie un grand coup dans la mâchoire de " + romain.getNom());
+	    
+	    Equipement[] equipementEjectes = romain.recevoirCoup((force / 2) * effetPotion);
+	    
+	    effetPotion--;
+	    if (effetPotion < 1) {
+	        effetPotion = 1;
+	    }
+
+	    for (int i = 0; equipementEjectes != null && i < equipementEjectes.length; i++, nbTrophees++) {
+	        this.trophees[nbTrophees] = equipementEjectes[i];
 	    }
 	}
 	
@@ -48,18 +56,34 @@ public class Gaulois {
 
 	public void sePresenter() {
 		if (village!=null) {
+			String bonjour = "Bonjour, je m'appelle ";
 			
 			if (village.getChef()==this) {
-				parler("Bonjour, je m'appelle "+nom+". Je suis le chef du village "+village.getNom()+".");
+				parler(bonjour+nom+". Je suis le chef du village "+village.getNom()+".");
 			}
 			
 			else {
-				parler("Bonjour, je m'appelle "+nom+". J'habite le village "+village.getNom()+".");
+				parler(bonjour+nom+". J'habite le village "+village.getNom()+".");
 			}
 		}
 
 		else {
 			parler("Bonjour, je m'appelle "+nom+". Je voyage de villages en villages.");
+		}
+	}
+	
+	public void faireUneDonnation(Musee musee) {
+		if (trophees[0]!=null){
+			String texte = "Je donne au musee tous mes trophees : ";
+			for (int i=0; i<100; i++) {
+				if(trophees[i]!=null) {
+					texte+="\n- "+trophees[i];
+					musee.donnerTrophees(this, trophees[i]);
+					trophees[i]=null;
+				}
+			}
+			parler(texte);
+			this.nbTrophees = 0;
 		}
 	}
 	
